@@ -255,3 +255,25 @@ Proof.
     Case "n = S n'".
     simpl. rewrite -> IHn'. rewrite -> mult_plus_distr_r. reflexivity.
 Qed.
+
+Theorem beq_nat_refl : forall n : nat,
+      true = beq_nat n n.
+Proof.
+    intros n.
+    induction n as [| n'].
+    Case "n = 0".
+    simpl. reflexivity.
+    Case "n = S n'".
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_swap' : forall n m p : nat,
+      n + (m + p) = m + (n + p).
+Proof.
+    intros n m p.
+    rewrite -> plus_assoc.
+    rewrite -> plus_assoc.
+    replace (n + m) with (m + n).
+    reflexivity.
+    rewrite -> plus_comm. reflexivity.
+Qed.
