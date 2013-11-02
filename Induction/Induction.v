@@ -107,3 +107,19 @@ Proof.
     Case "n = S n'".
         simpl. rewrite -> IHn'. reflexivity.
 Qed.
+
+Fixpoint double (n:nat) :=
+    match n with
+    | O => O
+    | S n' => S (S (double n'))
+  end.
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+    intros n.
+    induction n as [| n'].
+    Case "n = 0".
+        simpl. reflexivity.
+    Case "n = S n'".
+        simpl. rewrite -> IHn'. rewrite -> plus_n_Sm. reflexivity.
+Qed.
