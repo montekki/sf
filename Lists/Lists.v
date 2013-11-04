@@ -466,3 +466,41 @@ Proof.
     Case "l = n' l'".
         simpl. rewrite -> IHl'. reflexivity.
 Qed.
+
+Lemma app_empty: forall l1 : natlist,
+    l1 ++ [] = l1.
+Proof.
+    intros l1.
+    induction l1 as [| n l1'].
+    Case "l1 = nil".
+        reflexivity.
+    Case "l1 = n' l1'".
+        simpl. rewrite IHl1'. reflexivity.
+Qed.
+
+Theorem distr_rev : forall l1 l2 : natlist,
+    rev (l1 ++ l2) = (rev l2) ++ (rev l1).
+Proof.
+    intros l1 l2.
+    induction l1 as [| n' l1'].
+    Case "l1 = nil".
+        simpl. rewrite app_empty. reflexivity.
+    Case "l1 = n' l1'".
+        simpl. rewrite -> IHl1'. simpl.
+        rewrite -> snoc_append.
+        rewrite -> snoc_append.
+        rewrite -> app_ass. reflexivity.
+Qed.
+
+Lemma nonzeros_app : forall l1 l2 : natlist,
+    nonzeros(l1 ++ l2) = (nonzeros l1) ++ (nonzeros l2).
+Proof.
+    intros.  induction l1 as [| n l1'].
+    Case "l1 = nil".
+        simpl. reflexivity.
+    Case "l1 = n l1'".
+        destruct n as [| n'].
+            simpl. rewrite IHl1'. reflexivity.
+
+            simpl. rewrite IHl1'. reflexivity.
+Qed.
