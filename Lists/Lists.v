@@ -504,3 +504,46 @@ Proof.
 
             simpl. rewrite IHl1'. reflexivity.
 Qed.
+
+Theorem count_number_nonzero : forall(s : bag),
+    ble_nat 1 (count 1 (1 :: s)) = true.
+Proof.
+    intros s.
+    reflexivity.
+Qed.
+
+Theorem ble_n_Sn : forall n,
+    ble_nat n (S n) = true.
+Proof.
+    intros n. induction n as [| n'].
+    Case "0".
+        simpl. reflexivity.
+    Case "S n'".
+        simpl. rewrite IHn'. reflexivity.
+Qed.
+
+Theorem remove_decreases_count : forall (s : bag),
+    ble_nat (count 0 (remove_one 0 s)) (count 0 s) = true.
+Proof.
+    intros s. simpl.
+    induction s as [| n' s'].
+    Case "s = nil".
+        simpl. reflexivity.
+
+    Case "s = n' s'".
+        destruct n' as [| n''].
+            simpl. rewrite ble_n_Sn. reflexivity.
+
+            simpl. rewrite IHs'. reflexivity.
+Qed.
+
+Theorem rev_inj : forall(l1 l2 : natlist),
+    rev l1 = rev l2 -> l1 = l2.
+Proof.
+    intros l1 l2.
+    intros H.
+    rewrite <- rev_involutive.
+    rewrite <- H.
+    rewrite rev_involutive.
+    reflexivity.
+Qed.
