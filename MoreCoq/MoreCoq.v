@@ -255,5 +255,69 @@ Proof.
     apply f_equal.
     apply IHn'.
     inversion eq.
+    rewrite -> H0.
+    reflexivity.
 Qed.
 
+Theorem double_injective_take2 : forall n m,
+    double n = double m ->
+    n = m.
+Proof.
+    intros n m.
+    (* n and m are both in the context *)
+    generalize dependent n.
+    (* Now n is back in the goal and we can do induction on
+    m and get a sufficiently general IH. *)
+    induction m as [| m'].
+    Case "m = O". simpl. intros n eq. destruct n as [| n'].
+        SCase "n = O". reflexivity.
+        SCase "n = S n'". inversion eq.
+    Case "m = S m'". intros n eq. destruct n as [| n'].
+        SCase "n = O". inversion eq.
+        SCase "n = S n'". apply f_equal.
+            apply IHm'. inversion eq. reflexivity.
+Qed.
+
+Theorem index_after_last : forall(n : nat) (X : Type) (l : list X),
+    length l = n ->
+    index n l = None.
+Proof.
+    intros n X l.
+    generalize dependent n.
+    induction l as [| h' l'].
+    Case "l = nil".
+        reflexivity.
+
+    Case "l = h l'".
+        destruct n as [| n'].
+        SCase "n = 0".
+            simpl. intros eq. inversion eq.
+
+        SCase "n = S n'".
+            intros eq. symmetry in eq. rewrite eq. simpl.
+            apply IHl'. reflexivity.
+Qed.
+
+Theorem length_snoc''' : forall(n : nat) (X : Type)
+                        (v : X) (l : list X),
+            length l = n ->
+            length (snoc l v) = S n.
+Proof.
+    intros n X v l.
+    generalize dependent n.
+    generalize dependent v.
+    induction l as [| h l'].
+    Case "l = nil".
+        intros v n. intros eq. simpl in eq. symmetry in eq. rewrite eq. reflexivity.
+
+    Case "n = h n'".
+        intros v n.
+        intros eq.
+        simpl.
+        symmetry in eq.
+        rewrite eq.
+        apply f_equal.
+        simpl.
+        apply IHl'.
+        reflexivity.
+Qed.
