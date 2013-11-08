@@ -165,3 +165,88 @@ induction H.
  rewrite plus_0_r.
  apply IHgorgeous.
 Qed.
+
+Definition even (n:nat) : Prop :=
+    evenb n = true.
+
+Inductive ev : nat -> Prop :=
+    | ev_0 : ev 0
+    | ev_SS : forall n:nat, ev n -> ev (S (S n)).
+
+Theorem double_even : forall n,
+    ev (double n).
+Proof.
+    intros n.
+    induction n as [| n'].
+    Case "n = 0".
+        simpl. apply ev_0.
+
+    Case "n = S n'".
+        rewrite double_plus.
+        rewrite <- plus_n_Sm.
+        rewrite plus_comm.
+        rewrite <- plus_n_Sm.
+        apply ev_SS.
+        rewrite double_plus in IHn'.
+        apply IHn'.
+Qed.
+
+Theorem ev__even : forall n,
+    ev n -> even n.
+Proof.
+    intros n E. induction E as [| n' E'].
+    Case "E = ev_0".
+        unfold even. reflexivity.
+    Case "E = ev_SS n' E'".
+        unfold even. apply IHE'.
+Qed.
+
+Theorem l : forall n,
+    even n.
+Proof.
+    intros n. induction n.
+    (*
+     * In the second case of induction we will
+     * end up with the need to prove S n = n
+     *)
+Abort.
+
+Theorem ev_sum : forall n m,
+    ev n -> ev m -> ev (n + m).
+Proof.
+    intros n m E1 E2.
+    induction E1.
+    Case "ev_0".
+    rewrite plus_comm. rewrite plus_0_r. apply E2.
+
+    Case "ev_SS".
+    rewrite plus_comm. rewrite <- plus_n_Sm.
+    rewrite <- plus_n_Sm. apply ev_SS.
+    rewrite plus_comm. apply IHE1.
+Qed.
+
+Theorem ev_minus2 : forall n,
+    ev n -> ev (pred (pred n)).
+Proof.
+    intros n E.
+    inversion E as [| n' E'].
+    Case "E = ev_0". simpl. apply ev_0.
+    Case "E = ev_SS n' E'". simpl. apply E'.
+Qed.
+
+Theorem SSev_even : forall n,
+    ev (S (S n)) -> ev n.
+Proof.
+    intros n E.
+    inversion E as [| n' E'].
+    apply E'.
+Qed.
+
+Theorem SSSSev__even : forall n,
+    ev (S (S (S (S n)))) -> ev n.
+Proof.
+    intros n E.
+    inversion E as [| n' E'].
+    inversion E' as [| n'' E''].
+    apply E''.
+Qed.
