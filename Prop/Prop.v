@@ -250,3 +250,42 @@ Proof.
     inversion E' as [| n'' E''].
     apply E''.
 Qed.
+
+Theorem ev_ev__ev : forall n m,
+    ev (n + m) -> ev n -> ev m.
+Proof.
+    intros n m.
+    intros E1.
+    intros E2.
+    induction E2.
+    rewrite plus_comm in E1.
+    rewrite plus_0_r in E1.
+    apply E1.
+
+    rewrite plus_comm in E1.
+    rewrite <- plus_n_Sm in E1.
+    rewrite <- plus_n_Sm in E1.
+    inversion E1.
+    apply IHE2.
+    rewrite plus_comm.
+    apply H0.
+Qed.
+
+Theorem ev_plus_plus : forall n m p,
+    ev (n+m) -> ev (n+p) -> ev (m+p).
+Proof.
+    intros n m p E.
+    apply ev_ev__ev.
+    rewrite plus_comm.
+    rewrite plus_swap.
+    rewrite <- plus_assoc.
+    rewrite plus_assoc.
+    apply ev_sum.
+    apply E.
+    rewrite <- double_plus.
+    apply double_even.
+Qed.
+
+(*
+* TODO: Additional Exercises.
+*)
