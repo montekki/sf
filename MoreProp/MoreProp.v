@@ -194,3 +194,18 @@ Proof.
 
         apply H.
 Qed.
+
+Theorem combine_odd_even_elim_even :
+    forall(Podd Peven : nat -> Prop) (n : nat),
+        combine_odd_even Podd Peven n ->
+        oddb n = false ->
+        Peven n.
+Proof.
+    intros.
+    unfold combine_odd_even in H.
+    unfold oddb in H0.
+    destruct evenb.
+        apply H.
+
+        inversion H0.
+Qed.
