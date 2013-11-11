@@ -113,3 +113,84 @@ Proof.
     apply le_S in H.
     apply H.
 Qed.
+
+Module R.
+Inductive R : nat -> nat -> nat -> Prop :=
+| c1 : R 0 0 0
+| c2 : forall m n o, R m n o -> R (S m) n (S o)
+| c3 : forall m n o, R m n o -> R m (S n) (S o)
+| c4 : forall m n o, R (S m) (S n) (S (S o)) -> R m n o
+| c5 : forall m n o, R m n o -> R n m o.
+
+
+Example test_R1 : R 1 1 2.
+Proof.
+    apply c2.
+    apply c3.
+    apply c1.
+Qed.
+
+Example test_R2: R 2 2 6.
+Proof. Abort.
+
+(*
+ If we removed c5 or c4 nothing would change, we never used it
+ *)
+
+End R.
+
+Definition true_for_zero (P:nat -> Prop) : Prop :=
+    P 0.
+
+Definition true_for_all_numbers (P:nat -> Prop) : Prop :=
+    forall n, P n.
+
+Definition preserved_by_S (P:nat -> Prop) : Prop :=
+    forall n', P n' -> P (S n').
+
+Definition natural_number_induction_valid : Prop :=
+    forall (P:nat -> Prop),
+        true_for_zero P ->
+        preserved_by_S P ->
+        true_for_all_numbers P.
+
+Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
+    fun n => if (evenb n) then Peven n else Podd n.
+
+Theorem combine_odd_even_intro :
+    forall(Podd Peven : nat -> Prop) (n : nat),
+        (oddb n = true -> Podd n) ->
+        (oddb n = false -> Peven n) ->
+        combine_odd_even Podd Peven n.
+Proof.
+    intros.
+    unfold oddb in H, H0.
+    induction n.
+    unfold combine_odd_even.
+    apply H0.
+    reflexivity.
+
+    unfold combine_odd_even.
+    destruct evenb.
+    apply H0.
+    reflexivity.
+
+    apply H.
+    reflexivity.
+Qed.
+
+Theorem combine_odd_even_elim_odd :
+    forall (Podd Peven : nat -> Prop) (n : nat),
+    combine_odd_even Podd Peven n ->
+    oddb n = true ->
+    Podd n.
+
+Proof.
+    intros.
+    unfold combine_odd_even in H.
+    unfold oddb in H0.
+    destruct evenb.
+        inversion H0.
+
+        apply H.
+Qed.
