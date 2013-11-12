@@ -63,3 +63,93 @@ Proof.
 
         apply HR.
 Qed.
+
+Theorem even__ev : forall n : nat,
+    (even n -> ev n) /\ (even (S n) -> ev (S n)).
+Proof.
+    intros n.
+    induction n as [| n'].
+        split.
+        intros H.
+        apply ev_0.
+
+        intros H1.
+        inversion H1.
+
+    inversion IHn' as (HP, HQ).
+    split.
+    apply HQ.
+
+    intros J.
+    apply ev_SS.
+    apply HP.
+    unfold even.
+    unfold even in J.
+    simpl in J.
+    apply J.
+Qed.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                        (at level 95, no associativity)
+                        : type_scope.
+
+Theorem iff_implies : forall P Q : Prop,
+    (P <-> Q) -> P -> Q.
+Proof.
+    intros P Q H.
+    inversion H as [HAB HBA].
+    apply HAB.
+Qed.
+
+Theorem iff_sym : forall P Q : Prop,
+    (P <-> Q) -> (Q <-> P).
+Proof.
+    intros P Q H.
+    inversion H as [HAB HBA].
+    split.
+    Case "->". apply HBA.
+    Case "<-". apply HAB.
+Qed.
+
+Theorem iff_refl : forall P : Prop,
+    P <-> P.
+
+Proof.
+    intros P.
+    split.
+    Case "->". intros J. apply J.
+    Case "<-". intros J. apply J.
+Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+    (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof. Admitted.
+
+Inductive or (P Q : Prop) : Prop :=
+| or_introl : P -> or P Q
+| or_intror : Q -> or P Q.
+
+Notation "P \/ Q" := (or P Q) : type_scope.
+Check or_introl.
+
+Check or_intror.
+
+Theorem or_commut : forall P Q : Prop,
+    P \/ Q -> Q \/ P.
+Proof.
+    intros P Q H.
+    inversion H as [HP | HQ].
+    Case "left". apply or_intror. apply HP.
+    Case "right". apply or_introl. apply HQ.
+Qed.
+
+Theorem or_commut' : forall P Q : Prop,
+    P \/ Q -> Q \/ P.
+Proof.
+    intros P Q H.
+    inversion H as [HP | HQ].
+        Case "left". right. apply HP.
+        Case "right". left. apply HQ.
+Qed.
