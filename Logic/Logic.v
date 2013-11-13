@@ -185,3 +185,60 @@ Proof.
             SCase "left". apply HQ1.
             SCase "right". apply HR1.
 Qed.
+
+Theorem andb_prop : forall b c,
+    andb b c = true -> b = true /\ c = true.
+Proof.
+    intros b c H.
+    destruct b.
+    Case "b = true". destruct c.
+        SCase "c = true". apply conj. reflexivity. reflexivity.
+        SCase "c = false". inversion H.
+    Case "b = false". inversion H.
+Qed.
+
+Theorem andb_true_intro : forall b c,
+    b = true /\ c = true -> andb b c = true.
+Proof.
+    intros b c H.
+    inversion H.
+    rewrite H0. rewrite H1. reflexivity.
+Qed.
+
+Theorem andb_false : forall b c,
+    andb b c = false -> b = false \/ c = false.
+Proof.
+    intros b c H.
+    destruct b.
+    Case "b = true".
+        simpl in H. right. apply H.
+
+    Case "b = false".
+        simpl in H. left. apply H.
+Qed.
+
+Theorem orb_prop : forall b c,
+    orb b c = true -> b = true \/ c = true.
+Proof.
+    intros b c H.
+    destruct b.
+    Case "b = true".
+        simpl in H. left. apply H.
+
+    Case "b = false".
+        simpl in H. right. apply H.
+Qed.
+
+Theorem orb_false_elim : forall b c,
+    orb b c = false -> b = false /\ c = false.
+Proof.
+    intros b c H.
+    destruct b.
+    Case "b = true".
+        inversion H.
+
+    Case "b = false".
+        simpl in H. split.
+        Case "left". reflexivity.
+        Case "right". apply H.
+Qed.
