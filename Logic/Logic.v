@@ -153,3 +153,35 @@ Proof.
         Case "left". right. apply HP.
         Case "right". left. apply HQ.
 Qed.
+
+Theorem or_distributes_over_and_1 : forall P Q R : Prop,
+    P \/ (Q /\ R) -> (P \/ Q) /\ (P \/ R).
+Proof.
+    intros P Q R. intros H. inversion H as [HP | [HQ HR]].
+    Case "left". split.
+        SCase "left". left. apply HP.
+        SCase "right". left. apply HP.
+    Case "right". split.
+        SCase "left". right. apply HQ.
+        SCase "right". right. apply HR.
+Qed.
+
+Theorem or_distributes_over_and_2 : forall P Q R : Prop,
+    (P \/ Q) /\ (P \/ R) -> P \/ (Q /\ R).
+Proof.
+    intros P Q R H.
+    inversion H as [[HP1| HQ1] [HP2| HR1]].
+    Case "leftleft".
+        left. apply HP1.
+
+    Case "left".
+        left. apply HP1.
+
+    Case "right".
+        left. apply HP2.
+
+    Case "rightright".
+        right. split.
+            SCase "left". apply HQ1.
+            SCase "right". apply HR1.
+Qed.
