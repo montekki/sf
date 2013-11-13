@@ -239,6 +239,153 @@ Proof.
 
     Case "b = false".
         simpl in H. split.
-        Case "left". reflexivity.
-        Case "right". apply H.
+        SCase "left". reflexivity.
+        SCase "right". apply H.
+Qed.
+
+Inductive False : Prop := .
+Check tt.
+
+Theorem False_implies_nonsense :
+    False -> 2 + 2 = 5.
+Proof.
+    intros contra.
+    inversion contra.
+Qed.
+
+Theorem ex_falso_quodlibet : forall(P:Prop),
+    False -> P.
+Proof.
+    intros P contra.
+    inversion contra.
+Qed.
+
+Inductive True : Prop := tt : True.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not.
+
+Theorem not_False :
+    ~ False.
+Proof.
+    unfold not.
+    intros H.
+    inversion H.
+Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+    (P /\ ~P) -> Q.
+Proof.
+    intros P Q H.
+    inversion H as [HP HNA]. unfold not in HNA.
+    apply HNA in HP. inversion HP.
+Qed.
+
+Theorem double_neg : forall P : Prop,
+    P -> ~~P.
+Proof.
+    intros P H. unfold not. intros G. apply G. apply H.
+Qed.
+
+Theorem contrapositive : forall P Q : Prop,
+    (P -> Q) -> (~Q -> ~P).
+Proof.
+intros P Q H NQ.
+unfold not.
+intros HP.
+unfold not in NQ.
+apply NQ in H.
+    apply H.
+
+    apply HP.
+Qed.
+
+Theorem not_both_true_and_false : forall P : Prop,
+    ~ (P /\ ~P).
+Proof.
+    intros P.
+    unfold not.
+    intros H.
+    inversion H as [HL HR].
+    apply HR in HL.
+    apply HL.
+Qed.
+
+Theorem five_not_even :
+    ~ ev 5.
+Proof.
+    unfold not.
+    intros H.
+    inversion H.
+    inversion H1.
+    inversion H3.
+Qed.
+
+Theorem classic_double_neg : forall P : Prop,
+    ~~P -> P.
+Proof.
+    intros P H. unfold not in H. Abort.
+
+
+(*
+    TODO: Exercise classical_axioms
+*)
+
+Notation "x <> y" := (~ (x = y)) : type_scope.
+
+Theorem not_false_then_true : forall b : bool,
+    b <> false -> b = true.
+Proof.
+    intros b H. destruct b.
+    Case "b = true". reflexivity.
+    Case "b = false".
+        unfold not in H.
+        apply ex_falso_quodlibet.
+        apply H. reflexivity.
+Qed.
+
+Theorem false_beq_nat : forall n m : nat,
+    n <> m ->
+    beq_nat n m = false.
+Proof. Admitted.
+
+Theorem beq_nat_false : forall n m,
+    beq_nat n m = false -> n <> m.
+Proof. Admitted.
+
+Theorem ble_nat_false : forall n m ,
+    ble_nat n m = false -> ~(n <= m).
+Proof. Admitted.
+
+Inductive ex (X:Type) (P : X->Prop) : Prop :=
+    ex_intro : forall(witness:X), P witness -> ex X P.
+
+Notation "'exists' x , p" := (ex _ (fun x => p))
+    (at level 200, x ident, right associativity) : type_scope.
+Notation "'exists' x : X , p" := (ex _ (fun x:X => p))
+    (at level 200, x ident, right associativity) : type_scope.
+
+Example exists_example_1 : exists n, n + (n * n) = 6.
+Proof.
+    apply ex_intro with (witness:=2).
+    reflexivity.
+Qed.
+
+Example exists_example_1' : exists n, n + (n * n) = 6.
+Proof.
+    exists 2.
+    reflexivity.
+Qed.
+
+Theorem exists_example_2 : forall n,
+    (exists m, n = 4 + m) ->
+    (exists o, n = 2 + o).
+Proof.
+    intros n H.
+    inversion H as [m Hm].
+    exists(2 + m).
+    apply Hm.
 Qed.
