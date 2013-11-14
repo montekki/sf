@@ -389,3 +389,87 @@ Proof.
     exists(2 + m).
     apply Hm.
 Qed.
+
+Theorem dist_not_exists : forall(X:Type) (P:X -> Prop),
+    (forall x, P x) -> ~ (exists x, ~P x).
+Proof.
+    intros.
+    unfold not.
+    intros.
+    inversion H0.
+    apply H1.
+    apply H.
+Qed.
+
+Module MyEQ.
+Inductive eq {X:Type} : X -> X -> Prop :=
+    refl_equal : forall x, eq x x.
+
+Notation "x = y" := (eq x y)
+                    (at level 70, no associativity)
+                    : type_scope.
+
+Lemma leibniz_equality : forall(X : Type) (x y : X),
+    x = y -> forall P : X -> Prop, P x -> P y.
+Proof.
+    intros X x y H P.
+    inversion H.
+    intros J.
+    apply J.
+Qed.
+
+End MyEQ.
+
+Lemma four : 2 + 2 = 1 + 3.
+Proof.
+    apply refl_equal.
+Qed.
+
+Inductive sumbool (A B : Prop) : Set :=
+| left : A -> sumbool A B
+| right : B -> sumbool A B.
+
+Notation "{ A } + { B }" := (sumbool A B) : type_scope.
+
+Theorem eq_nat_dec : forall n m : nat, {n = m} + {n <> m}.
+Proof.
+    intros n.
+    induction n as [|n'].
+    Case "n = 0".
+        intros m.
+        destruct m as [|m'].
+        SCase "m = 0".
+            left. reflexivity.
+        SCase "m = S m'".
+            right. intros contra. inversion contra.
+    Case "n = S n'".
+        intros m.
+        destruct m as [|m'].
+        SCase "m = 0".
+            right. intros contra. inversion contra.
+        SCase "m = S m'".
+            destruct IHn' with (m := m') as [eq | neq].
+            left. apply f_equal. apply eq.
+            right. intros Heq. inversion Heq as [Heq']. apply neq. apply Heq'.
+Defined.
+
+Definition override' {X:Type} (f: nat -> X) (k:nat) (x:X) : nat -> X :=
+    fun (k':nat) => if eq_nat_dec k k' then x else f k'.
+
+Theorem override_same' : forall(X:Type) x1 k1 k2 (f : nat -> X),
+    f k1 = x1 ->
+    (override' f k1 x1) k2 = f k2.
+Proof.
+    intros X x1 k1 k2 f. intros Hx1.
+    unfold override'.
+    destruct (eq_nat_dec k1 k2).
+    Case "k1 = k2".
+        rewrite <- e.
+        symmetry. apply Hx1.
+    Case "k1 <> k2".
+        reflexivity.
+Qed.
+
+(*
+    TODO: Additional exercises
+*)
