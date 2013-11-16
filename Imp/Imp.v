@@ -306,5 +306,96 @@ Proof.
     Case "<-".
         generalize dependent n.
         induction a; simpl; intros; subst; constructor;
-            try apply IHa1; tryapply IHa2; reflexivity.
+            try apply IHa1; try apply IHa2; reflexivity.
 Qed.
+
+Module aevalR_division.
+
+Inductive aexp : Type :=
+| ANum : nat -> aexp
+| APlus : aexp -> aexp -> aexp
+| AMinus : aexp -> aexp -> aexp
+| AMult : aexp -> aexp -> aexp
+| ADiv : aexp -> aexp -> aexp.
+
+Inductive aevalR : aexp -> nat -> Prop :=
+| E_ANum : forall(n:nat),
+    (ANum n) || n
+| E_APlus : forall(a1 a2 : aexp) (n1 n2 : nat),
+    (a1 || n1) -> (a2 || n2) -> (APlus a1 a2 ) || (n1 + n2)
+| E_AMinus : forall(a1 a2 : aexp) (n1 n2 : nat),
+    (a1 || n1) -> (a2 || n2) -> (AMinus a1 a2) || (n1 - n2)
+| E_AMult : forall(a1 a2 : aexp) (n1 n2 : nat),
+    (a1 || n1) -> (a2 || n2) -> (AMult a1 a2) || (n1 * n2)
+| E_ADiv : forall(a1 a2 : aexp) (n1 n2 n3 : nat),
+    (a1 || n1) -> (a2 || n2) -> (mult n2 n3 = n1) -> (ADiv a1 a2) || n3
+
+where "a '||' n" := (aevalR a n) : type_scope.
+End aevalR_division.
+
+Module aevalR_extended.
+Inductive aexp : Type :=
+| AAny : aexp
+| ANum : nat -> aexp
+| APlus : aexp -> aexp -> aexp
+| AMinus : aexp -> aexp -> aexp
+| AMult : aexp -> aexp -> aexp.
+Inductive aevalR : aexp -> nat -> Prop :=
+  | E_Any : forall(n:nat),
+      AAny || n (* <--- new *)
+  | E_ANum : forall(n:nat),
+      (ANum n) || n
+  | E_APlus : forall(a1 a2: aexp) (n1 n2 : nat),
+      (a1 || n1) -> (a2 || n2) -> (APlus a1 a2) || (n1 + n2)
+  | E_AMinus : forall(a1 a2: aexp) (n1 n2 : nat),
+      (a1 || n1) -> (a2 || n2) -> (AMinus a1 a2) || (n1 - n2)
+  | E_AMult : forall(a1 a2: aexp) (n1 n2 : nat),
+      (a1 || n1) -> (a2 || n2) -> (AMult a1 a2) || (n1 * n2)
+
+where "a '||' n" := (aevalR a n) : type_scope.
+
+End aevalR_extended.
+
+Module Id.
+
+Inductive id : Type :=
+    Id : nat -> id.
+
+Theorem eq_id_dec : forall id1 id2 : id, {id1 = id2} + {id1 <> id2}.
+Proof.
+    intros id1 id2.
+    destruct id1 as [n1]. destruct id2 as [n2].
+    destruct (eq_nat_dec n1 n2) as [Heq | Hneq].
+    Case "n1 = n2".
+        left. rewrite Heq. reflexivity.
+    Case "n1 <> n2".
+        right. intros contra. inversion contra. apply Hneq. apply H0.
+Defined.
+
+Lemma eq_id : forall(T:Type) x (p q:T),
+              (if eq_id_dec x x then p else q) = p.
+Proof.
+    intros.
+    destruct (eq_id_dec x x).
+    Case "x = x".
+        reflexivity.
+    Case "x <> x (impossible)".
+        apply ex_falso_quodlibet; apply n; reflexivity.
+Qed.
+
+Lemma neq_id : forall(T:Type) x y (p q:T), x <> y ->
+               (if eq_id_dec x y then p else q) = q.
+Proof.
+    intros.
+    destruct (eq_id_dec x y).
+    Case "x = y (impossible)".
+        rewrite e in H.
+        apply ex_falso_quodlibet.
+        apply H.
+        reflexivity.
+
+    Case "x <> y".
+        reflexivity.
+Qed.
+
+End Id.
