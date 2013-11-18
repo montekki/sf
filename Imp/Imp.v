@@ -687,3 +687,79 @@ Proof.
     apply E_IfFalse.
       reflexivity.
       apply E_Ass. reflexivity. Qed.
+
+Example ceval_example2:
+    (X ::= ANum 0;; Y ::= ANum 1;; Z ::= ANum 2) / empty_state ||
+    (update (update (update empty_state X 0) Y 1) Z 2).
+Proof.
+repeat apply E_Seq.
+apply E_Seq with (update empty_state X 0).
+    apply E_Ass.
+    reflexivity.
+
+    apply E_Seq with (update (update empty_state X 0) Y 1).
+        apply E_Ass. reflexivity.
+        apply E_Ass. reflexivity.
+Qed.
+
+Theorem ceval_deterministic: forall c st st1 st2,
+    c / st || st1 ->
+    c / st || st2 ->
+    st1 = st2.
+
+Theorem ceval_deterministic: forall c st st1 st2,
+     c / st || st1 ->
+     c / st || st2 ->
+     st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2.
+  ceval_cases (induction E1) Case;
+           intros st2 E2; inversion E2; subst.
+  Case "E_Skip". reflexivity.
+  Case "E_Ass". reflexivity.
+  Case "E_Seq".
+    assert (st' = st'0) as EQ1.
+      SCase "Proof of assertion". apply IHE1_1; assumption.
+    subst st'0.
+    apply IHE1_2. assumption.
+  Case "E_IfTrue".
+    SCase "b1 evaluates to true".
+      apply IHE1. assumption.
+    SCase "b1 evaluates to false (contradiction)".
+      rewrite H in H5. inversion H5.
+  Case "E_IfFalse".
+    SCase "b1 evaluates to true (contradiction)".
+      rewrite H in H5. inversion H5.
+    SCase "b1 evaluates to false".
+      apply IHE1. assumption.
+  Case "E_WhileEnd".
+    SCase "b1 evaluates to false".
+      reflexivity.
+    SCase "b1 evaluates to true (contradiction)".
+      rewrite H in H2. inversion H2.
+  Case "E_WhileLoop".
+    SCase "b1 evaluates to false (contradiction)".
+      rewrite H in H4. inversion H4.
+    SCase "b1 evaluates to true".
+      assert (st' = st'0) as EQ1.
+        SSCase "Proof of assertion". apply IHE1_1; assumption.
+      subst st'0.
+      apply IHE1_2. assumption. Qed.
+
+Theorem plus2_spec : forall st n st',
+  st X = n ->
+  plus2 / st || st' ->
+  st' X = n + 2.
+Proof.
+  intros st n st' HX Heval.
+  (* Inverting Heval essentially forces Coq to expand one
+     step of the ceval computation - in this case revealing
+     that st' must be st extended with the new value of X,
+     since plus2 is an assignment *)
+  inversion Heval. subst. clear Heval. simpl.
+  apply update_eq. Qed.
+
+(*
+ TODO: Finish exercises
+*)
